@@ -1,0 +1,1797 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackPIX | Gateway de Pagamentos PIX</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset e estilos base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        :root {
+            --primary: #0A0A0A;
+            --primary-dark: #000000;
+            --secondary: #6c757d;
+            --accent: #0066FF;
+            --accent-dark: #0052CC;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --success: #00A878;
+            --danger: #E63946;
+            --warning: #FFC107;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --box-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s ease;
+            --gradient: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%);
+            --accent-gradient: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);
+            --card-bg: #ffffff;
+            --input-bg: #ffffff;
+            --border-color: rgba(0, 0, 0, 0.05);
+            --text-muted: #6c757d;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: var(--transition);
+        }
+        
+        body.dark-mode {
+            --light: #121212;
+            --dark: #f8f9fa;
+            --gray: #adb5bd;
+            --card-bg: #1e1e1e;
+            --input-bg: #2d2d2d;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-muted: #adb5bd;
+            background-color: var(--light);
+            color: var(--dark);
+        }
+        
+        /* Layout principal */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        header {
+            background-color: var(--card-bg);
+            box-shadow: var(--box-shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: var(--transition);
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+        
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: var(--gradient);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+        
+        .logo-subtitle {
+            font-size: 0.7rem;
+            color: var(--accent);
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+        }
+        
+        .nav-link {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+            padding: 0.5rem 0;
+            font-size: 0.95rem;
+        }
+        
+        .nav-link:hover {
+            color: var(--accent);
+        }
+        
+        .nav-link.active {
+            color: var(--accent);
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent-gradient);
+            border-radius: 3px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--dark);
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        body.dark-mode .theme-toggle {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--dark);
+        }
+        
+        .theme-toggle:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+            color: var(--accent);
+        }
+        
+        body.dark-mode .theme-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+        
+        .btn {
+            padding: 0.7rem 1.8rem;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--dark);
+            color: var(--dark);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--dark);
+            color: var(--light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .btn-accent {
+            background: var(--accent-gradient);
+            color: white;
+        }
+        
+        .btn-accent:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow);
+        }
+        
+        /* Conteúdo principal */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .page {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        .page.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Modal de Login/Cadastro */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .auth-container {
+            max-width: 450px;
+            width: 90%;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2.5rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        
+        .modal-overlay.active .auth-container {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .auth-header h2 {
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .auth-tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border-bottom: 3px solid transparent;
+        }
+        
+        .auth-tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+        
+        .auth-form {
+            display: none;
+        }
+        
+        .auth-form.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: var(--input-bg);
+            color: var(--dark);
+        }
+        
+        .form-group input:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.2);
+        }
+        
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .remember-me input {
+            width: auto;
+        }
+        
+        .forgot-password {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+        
+        .auth-btn {
+            width: 100%;
+            padding: 0.9rem;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .close-modal:hover {
+            color: var(--dark);
+        }
+        
+        /* Página inicial */
+        .hero {
+            text-align: center;
+            padding: 4rem 0 6rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            font-weight: 400;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+        
+        .feature-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2.5rem 2rem;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--box-shadow-hover);
+        }
+        
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: white;
+            font-size: 1.8rem;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+        
+        .feature-card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        
+        /* Página de pagamento PIX */
+        .payment-container {
+            max-width: 550px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2.5rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        .payment-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .payment-header h2 {
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        
+        .payment-amount {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin: 1.5rem 0;
+            text-shadow: 0 2px 10px rgba(0, 102, 255, 0.2);
+        }
+        
+        .pix-info {
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: var(--border-radius);
+            padding: 1.8rem;
+            margin-bottom: 1.8rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        
+        body.dark-mode .pix-info {
+            background-color: rgba(0, 102, 255, 0.08);
+        }
+        
+        .pix-code {
+            font-family: monospace;
+            background-color: var(--input-bg);
+            padding: 1.2rem;
+            border-radius: var(--border-radius);
+            margin: 1.2rem 0;
+            word-break: break-all;
+            font-size: 0.9rem;
+            border: 1px dashed var(--accent);
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--dark);
+        }
+        
+        .pix-code:hover {
+            background-color: rgba(0, 102, 255, 0.05);
+        }
+        
+        .pix-qr-code {
+            width: 220px;
+            height: 220px;
+            margin: 1.5rem auto;
+            background-color: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .pix-qr-code::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--accent-gradient);
+            opacity: 0.1;
+        }
+        
+        .pix-qr-code img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        
+        .pix-instructions {
+            margin-top: 2rem;
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: var(--border-radius);
+            padding: 1.8rem;
+        }
+        
+        body.dark-mode .pix-instructions {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .pix-instructions h3 {
+            margin-bottom: 1rem;
+            color: var(--dark);
+            font-weight: 600;
+        }
+        
+        .pix-instructions ol {
+            padding-left: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .pix-instructions li {
+            margin-bottom: 0.8rem;
+            padding-left: 0.5rem;
+            color: var(--text-muted);
+        }
+        
+        .copy-btn {
+            width: 100%;
+            margin-top: 1.2rem;
+            padding: 0.8rem;
+        }
+        
+        .payment-controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .payment-controls .btn {
+            flex: 1;
+        }
+        
+        /* Campo de entrada de valor */
+        .amount-input-container {
+            margin: 1.5rem 0;
+        }
+        
+        .amount-input {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .amount-input label {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .amount-input input {
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            width: 150px;
+            text-align: center;
+            transition: var(--transition);
+            font-weight: 500;
+            background-color: var(--input-bg);
+            color: var(--dark);
+        }
+        
+        .amount-input input:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.2);
+        }
+        
+        .amount-input button {
+            padding: 0.8rem 1.5rem;
+        }
+        
+        /* Página de Transações */
+        .transactions-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .transactions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .transactions-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--dark);
+        }
+        
+        .filter-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        
+        .transactions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .transaction-item {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            border-left: 4px solid var(--success);
+        }
+        
+        .transaction-item.failed {
+            border-left-color: var(--danger);
+        }
+        
+        .transaction-item.pending {
+            border-left-color: var(--warning);
+        }
+        
+        .transaction-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-hover);
+        }
+        
+        .transaction-info h4 {
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+        
+        .transaction-info p {
+            color: var(--text-muted);
+        }
+        
+        .transaction-amount {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+        
+        .transaction-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-completed {
+            background: rgba(0, 168, 120, 0.1);
+            color: var(--success);
+        }
+        
+        .status-failed {
+            background: rgba(230, 57, 70, 0.1);
+            color: var(--danger);
+        }
+        
+        .status-pending {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--warning);
+        }
+        
+        /* Página de configurações */
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .settings-section {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        .settings-header {
+            margin-bottom: 1.8rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .settings-header h2 {
+            color: var(--dark);
+        }
+        
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+        
+        .settings-item h4 {
+            color: var(--dark);
+        }
+        
+        .settings-item p {
+            color: var(--text-muted);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 54px;
+            height: 28px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: var(--transition);
+            border-radius: 28px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: var(--transition);
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        input:checked + .slider {
+            background: var(--accent-gradient);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--gradient);
+            color: white;
+            padding: 4rem 2rem 2rem;
+            margin-top: 4rem;
+            transition: var(--transition);
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+        }
+        
+        .footer-column h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            position: relative;
+            display: inline-block;
+            font-weight: 600;
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 3px;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.85rem;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: var(--transition);
+            display: inline-block;
+            font-weight: 400;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 3rem;
+            margin-top: 3rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 400;
+        }
+        
+        /* Toast de notificação */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .toast.error {
+            background: var(--danger);
+        }
+        
+        .toast.warning {
+            background: var(--warning);
+            color: var(--dark);
+        }
+        
+        /* Animações */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1.2rem;
+            }
+            
+            .nav-links {
+                gap: 1.2rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .payment-controls {
+                flex-direction: column;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+            
+            .amount-input {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .transactions-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .transaction-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .form-options {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <nav class="navbar">
+                <div class="logo">
+                    <div class="logo-icon">BP</div>
+                    <div class="logo-text">
+                        <span>BlackPIX</span>
+                        <span class="logo-subtitle">PAYMENTS</span>
+                    </div>
+                </div>
+                
+                <div class="nav-links">
+                    <a href="#" class="nav-link active" data-page="home">Início</a>
+                    <a href="#" class="nav-link" data-page="payment">Pagar com PIX</a>
+                    <a href="#" class="nav-link" data-page="transactions">Transações</a>
+                    <a href="#" class="nav-link" data-page="settings">Configurações</a>
+                </div>
+                
+                <div class="header-actions">
+                    <button class="theme-toggle" id="theme-toggle">🌙</button>
+                    <button class="btn btn-outline" id="header-login-btn">Entrar</button>
+                    <button class="btn btn-accent" id="header-register-btn">Cadastrar</button>
+                </div>
+            </nav>
+        </header>
+        
+        <main class="main-content">
+            <!-- Página Inicial -->
+            <section id="home" class="page active">
+                <div class="hero">
+                    <h1>Gateway de Pagamentos PIX para seu negócio</h1>
+                    <p>Integração simples, segura e eficiente para receber pagamentos instantâneos via PIX em sua plataforma.</p>
+                    <button class="btn btn-accent" style="padding: 0.9rem 2.5rem; font-size: 1.1rem;">Começar agora</button>
+                </div>
+                
+                <div class="features">
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Processamento Instantâneo</h3>
+                        <p>Transações PIX processadas em segundos com nossa tecnologia de ponta e baixa latência.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>Segurança Máxima</h3>
+                        <p>Proteção de dados com criptografia de última geração e conformidade com as normas do BACEN.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">💰</div>
+                        <h3>Taxas Competitivas</h3>
+                        <p>Economize com taxas muito menores que cartões de crédito e boletos bancários.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Página de Pagamento PIX -->
+            <section id="payment" class="page">
+                <div class="payment-container">
+                    <div class="payment-header">
+                        <h2>Pagamento via PIX</h2>
+                        <p>Escaneie o QR Code ou copie o código para pagar</p>
+                        <div class="payment-amount">R$ <span id="payment-value">150,00</span></div>
+                    </div>
+                    
+                    <div class="pix-info">
+                        <h3>QR Code PIX</h3>
+                        
+                        <!-- Campo para inserir o valor -->
+                        <div class="amount-input-container">
+                            <div class="amount-input">
+                                <label for="custom-amount">Valor:</label>
+                                <input type="text" id="custom-amount" placeholder="0,00" value="150,00">
+                                <button class="btn btn-accent" id="update-amount-btn">Atualizar</button>
+                            </div>
+                        </div>
+                        
+                        <div class="pix-qr-code" id="qr-code-container">
+                            <!-- QR Code será gerado dinamicamente -->
+                            <div style="text-align: center; color: var(--accent);">
+                                <div style="font-size: 4rem;">💰</div>
+                                <p>QR Code PIX</p>
+                                <small>Valor: R$ 150,00</small>
+                            </div>
+                        </div>
+                        
+                        <p>Ou copie o código PIX:</p>
+                        <div class="pix-code" id="pix-code">
+                            00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5913NOME DO RECEBEDOR6008BRASILIA62070503***6304E2CA
+                        </div>
+                        
+                        <button class="btn btn-accent copy-btn" id="copy-pix-btn">
+                            <span>Copiar Código PIX</span>
+                        </button>
+                    </div>
+                    
+                    <div class="pix-instructions">
+                        <h3>Como pagar com PIX:</h3>
+                        <ol>
+                            <li>Abra o aplicativo do seu banco</li>
+                            <li>Selecione a opção PIX</li>
+                            <li>Escaneie o QR Code ou cole o código copiado</li>
+                            <li>Confirme o pagamento</li>
+                            <li>Pronto! Seu pagamento será processado instantaneamente</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Página de Transações -->
+            <section id="transactions" class="page">
+                <div class="transactions-container">
+                    <div class="transactions-header">
+                        <h2>Histórico de Transações</h2>
+                        <button class="btn btn-accent" id="refresh-transactions">Atualizar</button>
+                    </div>
+                    
+                    <div class="transactions-filters">
+                        <button class="filter-btn active" data-filter="all">Todas</button>
+                        <button class="filter-btn" data-filter="completed">Concluídas</button>
+                        <button class="filter-btn" data-filter="pending">Pendentes</button>
+                        <button class="filter-btn" data-filter="failed">Falhas</button>
+                    </div>
+                    
+                    <div class="transactions-list" id="transactions-list">
+                        <!-- Transações serão carregadas dinamicamente -->
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Página de Configurações -->
+            <section id="settings" class="page">
+                <div class="settings-container">
+                    <div class="settings-section">
+                        <div class="settings-header">
+                            <h2>Preferências de Conta</h2>
+                        </div>
+                        
+                        <div class="settings-item">
+                            <div>
+                                <h4>Notificações por E-mail</h4>
+                                <p>Receba alertas sobre suas transações</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="settings-item">
+                            <div>
+                                <h4>Modo Escuro</h4>
+                                <p>Interface com tema escuro</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="dark-mode-toggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <div class="settings-header">
+                            <h2>Preferências de Pagamento</h2>
+                        </div>
+                        
+                        <div class="settings-item">
+                            <div>
+                                <h4>Chave PIX</h4>
+                                <p>CPF: 123.456.789-00</p>
+                            </div>
+                            <button class="btn btn-outline">Alterar</button>
+                        </div>
+                        
+                        <div class="settings-item">
+                            <div>
+                                <h4>Limite de Transação</h4>
+                                <p>R$ 5.000,00 por transação</p>
+                            </div>
+                            <button class="btn btn-outline">Alterar</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Modal de Login/Cadastro -->
+        <div class="modal-overlay" id="auth-modal">
+            <div class="auth-container">
+                <button class="close-modal" id="close-auth-modal">×</button>
+                
+                <div class="auth-header">
+                    <h2 id="auth-modal-title">Acesse sua conta</h2>
+                    <p id="auth-modal-subtitle">Entre com seus dados ou crie uma nova conta</p>
+                </div>
+                
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login">Login</button>
+                    <button class="auth-tab" data-tab="register">Cadastro</button>
+                </div>
+                
+                <!-- Formulário de Login -->
+                <form class="auth-form active" id="login-form">
+                    <div class="form-group">
+                        <label for="login-identifier">CPF ou E-mail</label>
+                        <input type="text" id="login-identifier" placeholder="Digite seu CPF ou e-mail" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="login-password">Senha</label>
+                        <input type="password" id="login-password" placeholder="Digite sua senha" required>
+                    </div>
+                    
+                    <div class="form-options">
+                        <div class="remember-me">
+                            <input type="checkbox" id="remember-me">
+                            <label for="remember-me">Lembrar-me</label>
+                        </div>
+                        <a href="#" class="forgot-password">Esqueci minha senha</a>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-accent auth-btn">Entrar</button>
+                </form>
+                
+                <!-- Formulário de Cadastro -->
+                <form class="auth-form" id="register-form">
+                    <div class="form-group">
+                        <label for="register-name">Nome completo</label>
+                        <input type="text" id="register-name" placeholder="Digite seu nome completo" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-phone">Telefone</label>
+                        <input type="tel" id="register-phone" placeholder="(11) 99999-9999" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-cpf">CPF</label>
+                        <input type="text" id="register-cpf" placeholder="000.000.000-00" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-email">E-mail</label>
+                        <input type="email" id="register-email" placeholder="seu@email.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-password">Senha</label>
+                        <input type="password" id="register-password" placeholder="Crie uma senha segura" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-confirm-password">Confirmar Senha</label>
+                        <input type="password" id="register-confirm-password" placeholder="Digite a senha novamente" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-accent auth-btn">Criar conta</button>
+                </form>
+            </div>
+        </div>
+        
+        <footer>
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>BlackPIX Payments</h3>
+                    <p>Soluções de pagamento PIX seguras e eficientes para empresas de todos os tamanhos.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Produtos</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Pagamentos Online</a></li>
+                        <li><a href="#">Link de Pagamento</a></li>
+                        <li><a href="#">Cobranças Recorrentes</a></li>
+                        <li><a href="#">Soluções Corporativas</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Recursos</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Documentação</a></li>
+                        <li><a href="#">API PIX</a></li>
+                        <li><a href="#">Suporte</a></li>
+                        <li><a href="#">Status do Sistema</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Empresa</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Sobre Nós</a></li>
+                        <li><a href="#">Carreiras</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Contato</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                &copy; 2023 BlackPIX Payments. Todos os direitos reservados.
+            </div>
+        </footer>
+    </div>
+
+    <!-- Toast de notificação -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Dados de exemplo para transações
+        const sampleTransactions = [
+            { id: 1, description: "Pagamento de serviço", amount: 150.00, status: "completed", date: "2023-11-15 14:30" },
+            { id: 2, description: "Venda online", amount: 89.90, status: "completed", date: "2023-11-14 10:15" },
+            { id: 3, description: "Assinatura mensal", amount: 29.90, status: "pending", date: "2023-11-15 09:45" },
+            { id: 4, description: "Pagamento falhou", amount: 200.00, status: "failed", date: "2023-11-13 16:20" },
+            { id: 5, description: "Compra em loja", amount: 350.00, status: "completed", date: "2023-11-12 11:30" },
+            { id: 6, description: "Serviço freelance", amount: 500.00, status: "completed", date: "2023-11-11 08:45" }
+        ];
+
+        // Navegação entre páginas com transição suave
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pages = document.querySelectorAll('.page');
+            
+            // Função para trocar de página
+            function switchPage(targetPage) {
+                // Remover classe active de todas as páginas e links
+                pages.forEach(page => {
+                    page.classList.remove('active');
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                // Adicionar classe active à página e link selecionados
+                document.getElementById(targetPage).classList.add('active');
+                document.querySelector(`[data-page="${targetPage}"]`).classList.add('active');
+                
+                // Carregar dados específicos da página
+                if (targetPage === 'transactions') {
+                    loadTransactions();
+                }
+            }
+            
+            // Adicionar evento de clique aos links de navegação
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetPage = this.getAttribute('data-page');
+                    switchPage(targetPage);
+                });
+            });
+            
+            // Controle do modo escuro
+            const themeToggle = document.getElementById('theme-toggle');
+            const darkModeToggle = document.getElementById('dark-mode-toggle');
+            
+            function toggleDarkMode() {
+                document.body.classList.toggle('dark-mode');
+                
+                // Atualizar ícone do botão
+                if (document.body.classList.contains('dark-mode')) {
+                    themeToggle.textContent = '☀️';
+                    if (darkModeToggle) darkModeToggle.checked = true;
+                } else {
+                    themeToggle.textContent = '🌙';
+                    if (darkModeToggle) darkModeToggle.checked = false;
+                }
+                
+                // Salvar preferência no localStorage
+                localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+            }
+            
+            themeToggle.addEventListener('click', toggleDarkMode);
+            
+            if (darkModeToggle) {
+                darkModeToggle.addEventListener('change', toggleDarkMode);
+            }
+            
+            // Verificar preferência salva
+            if (localStorage.getItem('darkMode') === 'true') {
+                toggleDarkMode();
+            }
+            
+            // Função para mostrar toast
+            function showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.className = 'toast';
+                toast.classList.add(type, 'show');
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Gerador de PIX
+            function generatePix(amount) {
+                // Atualizar o valor do pagamento
+                document.getElementById('payment-value').textContent = amount;
+                
+                // Gerar um código PIX aleatório (simulação)
+                const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+                let pixCode = '000201';
+                
+                // Adicionar partes aleatórias ao código
+                for (let i = 0; i < 5; i++) {
+                    const segmentLength = Math.floor(Math.random() * 20) + 10;
+                    let segment = '';
+                    
+                    for (let j = 0; j < segmentLength; j++) {
+                        segment += chars.charAt(Math.floor(Math.random() * chars.length));
+                    }
+                    
+                    pixCode += (segmentLength < 10 ? '0' + segmentLength : segmentLength) + segment;
+                }
+                
+                pixCode += '6304';
+                
+                // Adicionar checksum aleatório
+                for (let i = 0; i < 4; i++) {
+                    pixCode += chars.charAt(Math.floor(Math.random() * 16));
+                }
+                
+                document.getElementById('pix-code').textContent = pixCode;
+                
+                // Simular geração de QR Code
+                const qrContainer = document.getElementById('qr-code-container');
+                qrContainer.innerHTML = `
+                    <div style="text-align: center; color: var(--accent);">
+                        <div style="font-size: 4rem;">💰</div>
+                        <p>QR Code PIX</p>
+                        <small>Valor: R$ ${amount}</small>
+                    </div>
+                `;
+            }
+            
+            // Copiar código PIX
+            const copyPixBtn = document.getElementById('copy-pix-btn');
+            if (copyPixBtn) {
+                copyPixBtn.addEventListener('click', function() {
+                    const pixCode = document.getElementById('pix-code');
+                    const textArea = document.createElement('textarea');
+                    textArea.value = pixCode.textContent;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    showToast('Código PIX copiado para a área de transferência!', 'success');
+                });
+            }
+            
+            // Atualizar valor do PIX
+            const updateAmountBtn = document.getElementById('update-amount-btn');
+            const customAmountInput = document.getElementById('custom-amount');
+            
+            if (updateAmountBtn && customAmountInput) {
+                updateAmountBtn.addEventListener('click', function() {
+                    let amount = customAmountInput.value;
+                    
+                    // Validar o valor inserido
+                    if (!amount || isNaN(amount.replace(',', '.'))) {
+                        showToast('Por favor, insira um valor válido!', 'error');
+                        return;
+                    }
+                    
+                    // Formatar o valor (garantir que tem duas casas decimais)
+                    amount = parseFloat(amount.replace(',', '.')).toFixed(2).replace('.', ',');
+                    customAmountInput.value = amount;
+                    
+                    // Gerar novo PIX com o valor inserido
+                    generatePix(amount);
+                    showToast(`PIX atualizado para R$ ${amount}`, 'success');
+                });
+                
+                // Permitir atualizar pressionando Enter
+                customAmountInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        updateAmountBtn.click();
+                    }
+                });
+            }
+            
+            // Sistema de Login/Cadastro - Modal
+            const authModal = document.getElementById('auth-modal');
+            const authTabs = document.querySelectorAll('.auth-tab');
+            const authForms = document.querySelectorAll('.auth-form');
+            const closeAuthModal = document.getElementById('close-auth-modal');
+            const headerLoginBtn = document.getElementById('header-login-btn');
+            const headerRegisterBtn = document.getElementById('header-register-btn');
+            
+            // Abrir modal de login
+            if (headerLoginBtn) {
+                headerLoginBtn.addEventListener('click', function() {
+                    openAuthModal('login');
+                });
+            }
+            
+            // Abrir modal de cadastro
+            if (headerRegisterBtn) {
+                headerRegisterBtn.addEventListener('click', function() {
+                    openAuthModal('register');
+                });
+            }
+            
+            // Fechar modal
+            if (closeAuthModal) {
+                closeAuthModal.addEventListener('click', function() {
+                    closeAuthModalFunc();
+                });
+            }
+            
+            // Fechar modal ao clicar fora
+            authModal.addEventListener('click', function(e) {
+                if (e.target === authModal) {
+                    closeAuthModalFunc();
+                }
+            });
+            
+            // Função para abrir modal
+            function openAuthModal(tab) {
+                authModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                
+                // Ativar aba selecionada
+                authTabs.forEach(t => t.classList.remove('active'));
+                document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+                
+                // Mostrar formulário correspondente
+                authForms.forEach(form => {
+                    form.classList.remove('active');
+                    if (form.id === `${tab}-form`) {
+                        form.classList.add('active');
+                    }
+                });
+                
+                // Atualizar título do modal
+                const modalTitle = document.getElementById('auth-modal-title');
+                const modalSubtitle = document.getElementById('auth-modal-subtitle');
+                
+                if (tab === 'login') {
+                    modalTitle.textContent = 'Acesse sua conta';
+                    modalSubtitle.textContent = 'Entre com seus dados para acessar sua conta';
+                } else {
+                    modalTitle.textContent = 'Criar nova conta';
+                    modalSubtitle.textContent = 'Preencha os dados abaixo para criar sua conta';
+                }
+            }
+            
+            // Função para fechar modal
+            function closeAuthModalFunc() {
+                authModal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+            
+            // Alternar entre abas no modal
+            authTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetTab = this.getAttribute('data-tab');
+                    
+                    // Ativar aba selecionada
+                    authTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Mostrar formulário correspondente
+                    authForms.forEach(form => {
+                        form.classList.remove('active');
+                        if (form.id === `${targetTab}-form`) {
+                            form.classList.add('active');
+                        }
+                    });
+                    
+                    // Atualizar título do modal
+                    const modalTitle = document.getElementById('auth-modal-title');
+                    const modalSubtitle = document.getElementById('auth-modal-subtitle');
+                    
+                    if (targetTab === 'login') {
+                        modalTitle.textContent = 'Acesse sua conta';
+                        modalSubtitle.textContent = 'Entre com seus dados para acessar sua conta';
+                    } else {
+                        modalTitle.textContent = 'Criar nova conta';
+                        modalSubtitle.textContent = 'Preencha os dados abaixo para criar sua conta';
+                    }
+                });
+            });
+            
+            // Formulário de Login
+            const loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const identifier = document.getElementById('login-identifier').value;
+                    const password = document.getElementById('login-password').value;
+                    
+                    // Validação básica
+                    if (!identifier || !password) {
+                        showToast('Por favor, preencha todos os campos!', 'error');
+                        return;
+                    }
+                    
+                    // Simular autenticação
+                    showToast('Login realizado com sucesso!', 'success');
+                    this.reset();
+                    
+                    // Fechar modal após login
+                    setTimeout(() => {
+                        closeAuthModalFunc();
+                    }, 1500);
+                });
+            }
+            
+            // Formulário de Cadastro
+            const registerForm = document.getElementById('register-form');
+            if (registerForm) {
+                registerForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const name = document.getElementById('register-name').value;
+                    const phone = document.getElementById('register-phone').value;
+                    const cpf = document.getElementById('register-cpf').value;
+                    const email = document.getElementById('register-email').value;
+                    const password = document.getElementById('register-password').value;
+                    const confirmPassword = document.getElementById('register-confirm-password').value;
+                    
+                    // Validações
+                    if (!name || !phone || !cpf || !email || !password || !confirmPassword) {
+                        showToast('Por favor, preencha todos os campos!', 'error');
+                        return;
+                    }
+                    
+                    if (password !== confirmPassword) {
+                        showToast('As senhas não coincidem!', 'error');
+                        return;
+                    }
+                    
+                    if (password.length < 6) {
+                        showToast('A senha deve ter pelo menos 6 caracteres!', 'error');
+                        return;
+                    }
+                    
+                    // Simular cadastro
+                    showToast('Cadastro realizado com sucesso!', 'success');
+                    this.reset();
+                    
+                    // Fechar modal e mudar para aba de login após cadastro
+                    setTimeout(() => {
+                        closeAuthModalFunc();
+                        
+                        // Se reabrir o modal, mostrar a aba de login
+                        setTimeout(() => {
+                            authTabs.forEach(t => t.classList.remove('active'));
+                            document.querySelector('[data-tab="login"]').classList.add('active');
+                            
+                            authForms.forEach(form => {
+                                form.classList.remove('active');
+                                if (form.id === 'login-form') {
+                                    form.classList.add('active');
+                                }
+                            });
+                        }, 100);
+                    }, 1500);
+                });
+            }
+            
+            // Carregar transações
+            function loadTransactions(filter = 'all') {
+                const transactionsList = document.getElementById('transactions-list');
+                transactionsList.innerHTML = '';
+                
+                const filteredTransactions = filter === 'all' 
+                    ? sampleTransactions 
+                    : sampleTransactions.filter(t => t.status === filter);
+                
+                if (filteredTransactions.length === 0) {
+                    transactionsList.innerHTML = '<p style="text-align: center; padding: 2rem; color: var(--text-muted);">Nenhuma transação encontrada</p>';
+                    return;
+                }
+                
+                filteredTransactions.forEach(transaction => {
+                    const transactionItem = document.createElement('div');
+                    transactionItem.className = `transaction-item ${transaction.status}`;
+                    
+                    let statusText = '';
+                    let statusClass = '';
+                    
+                    switch(transaction.status) {
+                        case 'completed':
+                            statusText = 'Concluída';
+                            statusClass = 'status-completed';
+                            break;
+                        case 'pending':
+                            statusText = 'Pendente';
+                            statusClass = 'status-pending';
+                            break;
+                        case 'failed':
+                            statusText = 'Falhou';
+                            statusClass = 'status-failed';
+                            break;
+                    }
+                    
+                    transactionItem.innerHTML = `
+                        <div class="transaction-info">
+                            <h4>${transaction.description}</h4>
+                            <p>${transaction.date}</p>
+                        </div>
+                        <div class="transaction-amount">R$ ${transaction.amount.toFixed(2).replace('.', ',')}</div>
+                        <div class="transaction-status ${statusClass}">${statusText}</div>
+                    `;
+                    
+                    transactionsList.appendChild(transactionItem);
+                });
+            }
+            
+            // Filtros de transações
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const filter = this.getAttribute('data-filter');
+                    loadTransactions(filter);
+                });
+            });
+            
+            // Atualizar transações
+            const refreshBtn = document.getElementById('refresh-transactions');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', function() {
+                    this.classList.add('pulse');
+                    setTimeout(() => {
+                        this.classList.remove('pulse');
+                        loadTransactions();
+                        showToast('Transações atualizadas!', 'success');
+                    }, 1000);
+                });
+            }
+            
+            // Gerar PIX inicial
+            generatePix('150,00');
+        });
+    </script>
+</body>
+</html>
